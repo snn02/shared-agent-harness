@@ -1,0 +1,12 @@
+python-docx==1.2.0
+pdfplumber==0.11.8
+pypdfium2==5.6.0
+Pillow==13.0.0
+defusedxml==0.7.1
+lxml==6.1.3
+typing_extensions==4.16.0
+pdfminer.six==20251107
+charset-normalizer==3.5.2
+cryptography==50.0.2
+cffi==2.1.1
+pycparser==3.12

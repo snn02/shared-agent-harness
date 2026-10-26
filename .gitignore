@@ -1,0 +1,8 @@
+dist/
+.superpowers/
+01-inputs/
+02-work/
+/AGENTS.md
+grilling/
+__pycache__/
+*.pyc
