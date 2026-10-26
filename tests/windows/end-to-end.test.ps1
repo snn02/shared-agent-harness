@@ -10,8 +10,8 @@ try {
     $cyrillic = -join ([char[]]@(0x041F, 0x0440, 0x043E, 0x0444, 0x0438, 0x043B, 0x044C))
     $out = Join-Path $scratch 'release'
     & (Join-Path $Root 'tools\build-windows-release.ps1') -OutputDirectory $out | Out-Null
-    $zip = Join-Path $out 'agent-harness-windows-v0.4.2.zip'
-    $expectedHash = ((Get-Content -LiteralPath (Join-Path $out 'agent-harness-windows-v0.4.2.sha256') -Raw).Split(' ')[0]).Trim()
+    $zip = Join-Path $out 'agent-harness-windows-v0.4.3.zip'
+    $expectedHash = ((Get-Content -LiteralPath (Join-Path $out 'agent-harness-windows-v0.4.3.sha256') -Raw).Split(' ')[0]).Trim()
     if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant() -cne $expectedHash) { throw 'Release SHA-256 differs' }
     $extract = Join-Path $scratch ('unpacked ' + $cyrillic)
     Expand-Archive -LiteralPath $zip -DestinationPath $extract

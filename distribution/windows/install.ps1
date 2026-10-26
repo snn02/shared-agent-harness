@@ -590,7 +590,7 @@ try {
         -not (Test-Path -LiteralPath (Join-Path $root 'readme.md') -PathType Leaf) -or
         $launcher.Count -ne 1) { throw 'Package documentation or launcher is missing' }
     $expectedFiles = @(
-        'version.txt', 'install.ps1', 'installation-guide.md', 'readme.md', $launcher[0].Name,
+        'version.txt', 'install.ps1', 'installation-guide.md', 'readme.md', 'LICENSE', $launcher[0].Name,
         'payload/AGENTS.md',
         'payload/memory/profile.md', 'payload/memory/company.md',
         'payload/memory/decisions.md',

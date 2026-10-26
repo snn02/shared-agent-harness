@@ -21,7 +21,7 @@ try {
     $out = Join-Path $scratch 'package'
     & (Join-Path $Root 'tools\build-windows-release.ps1') -OutputDirectory $out | Out-Null
     $extract = Join-Path $scratch 'unpacked'
-    Expand-Archive -LiteralPath (Join-Path $out 'agent-harness-windows-v0.4.2.zip') -DestinationPath $extract
+    Expand-Archive -LiteralPath (Join-Path $out 'agent-harness-windows-v0.4.3.zip') -DestinationPath $extract
     $installer = Join-Path $extract 'install.ps1'
     $bin = Join-Path $scratch 'bin'
     New-Item -ItemType Directory -Path $bin | Out-Null
@@ -42,7 +42,7 @@ try {
         throw 'Personal template does not explain where to register the library'
     }
     $state = Get-Content -LiteralPath $marker -Raw -Encoding UTF8 | ConvertFrom-Json
-    if ($state.schema -ne 1 -or $state.version -cne '0.4.2' -or -not $state.files.'AGENTS.md'.baseHash) {
+    if ($state.schema -ne 1 -or $state.version -cne '0.4.3' -or -not $state.files.'AGENTS.md'.baseHash) {
         throw 'Marker lacks the accepted base hash'
     }
     $before = (Get-FileHash -LiteralPath $rules -Algorithm SHA256).Hash

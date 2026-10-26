@@ -27,18 +27,18 @@ function New-Profile([string]$Name) {
 try {
     $builder = Join-Path $Root 'tools\build-windows-release.ps1'
     $v1Out = Join-Path $scratch 'old build'
-    & $builder -OutputDirectory $v1Out -ExpectedVersion '0.4.2' | Out-Null
+    & $builder -OutputDirectory $v1Out -ExpectedVersion '0.4.3' | Out-Null
     $v1 = Join-Path $scratch 'old extracted'
-    Expand-Archive -LiteralPath (Join-Path $v1Out 'agent-harness-windows-v0.4.2.zip') -DestinationPath $v1
+    Expand-Archive -LiteralPath (Join-Path $v1Out 'agent-harness-windows-v0.4.3.zip') -DestinationPath $v1
 
     $v2Source = Join-Path $scratch 'new source'
     Copy-Item -LiteralPath (Join-Path $Root 'distribution\windows') -Destination $v2Source -Recurse
-    [IO.File]::WriteAllText((Join-Path $v2Source 'version.txt'), "0.4.3`n")
+    [IO.File]::WriteAllText((Join-Path $v2Source 'version.txt'), "0.4.4`n")
     Add-Content -LiteralPath (Join-Path $v2Source 'payload\AGENTS.md') -Value "`nPilot update instruction." -Encoding UTF8
     $v2Out = Join-Path $scratch 'new build'
-    & $builder -SourceRoot $v2Source -OutputDirectory $v2Out -ExpectedVersion '0.4.3' | Out-Null
+    & $builder -SourceRoot $v2Source -OutputDirectory $v2Out -ExpectedVersion '0.4.4' | Out-Null
     $v2 = Join-Path $scratch 'new extracted'
-    Expand-Archive -LiteralPath (Join-Path $v2Out 'agent-harness-windows-v0.4.3.zip') -DestinationPath $v2
+    Expand-Archive -LiteralPath (Join-Path $v2Out 'agent-harness-windows-v0.4.4.zip') -DestinationPath $v2
 
     $bin = Join-Path $scratch 'bin'
     New-Item -ItemType Directory -Path $bin | Out-Null
@@ -79,7 +79,7 @@ try {
         throw 'Locally populated knowledge index changed during update'
     }
     $state = Get-Content -LiteralPath (Join-Path $clean '.agents\.harness-install.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-    if ($state.version -cne '0.4.3' -or -not $state.complete) { throw 'Successful update marker is wrong' }
+    if ($state.version -cne '0.4.4' -or -not $state.complete) { throw 'Successful update marker is wrong' }
     if ($state.files.'knowledge/index.md'.status -cne 'local') { throw 'Unchanged package file with local edits was not preserved as local' }
     $backups = @(Get-ChildItem -LiteralPath (Join-Path $clean '.agents\.harness-backups') -Filter 'AGENTS.md' -File -Recurse)
     if ($backups.Count -ne 1 -or -not [Linq.Enumerable]::SequenceEqual([byte[]]$oldRules, [byte[]][IO.File]::ReadAllBytes($backups[0].FullName))) {
@@ -165,7 +165,7 @@ try {
     $failedUpdate = Run-Release $v2 $fault $true $true
     $faultState = Get-Content -LiteralPath (Join-Path $fault '.agents\.harness-install.json') -Raw -Encoding UTF8 | ConvertFrom-Json
     if ($failedUpdate.code -eq 0 -or $faultHash -cne (Get-FileHash -LiteralPath $faultRules -Algorithm SHA256).Hash -or
-        $faultState.version -cne '0.4.2') { throw 'Interrupted update did not restore the prior version' }
+        $faultState.version -cne '0.4.3') { throw 'Interrupted update did not restore the prior version' }
     Write-Output 'Update.Tests: PASS'
 }
 finally {

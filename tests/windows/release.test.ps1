@@ -20,26 +20,34 @@ try {
     }
     $one = Join-Path $scratch 'first output'
     $two = Join-Path $scratch 'second output'
-    & $builder -SourceRoot $source -OutputDirectory $one -ExpectedVersion '0.4.2' | Out-Null
-    & $builder -SourceRoot $source -OutputDirectory $two -ExpectedVersion '0.4.2' | Out-Null
+    & $builder -SourceRoot $source -OutputDirectory $one -ExpectedVersion '0.4.3' | Out-Null
+    & $builder -SourceRoot $source -OutputDirectory $two -ExpectedVersion '0.4.3' | Out-Null
     $direct = Join-Path $scratch 'direct invocation'
-    $directOutput = & powershell.exe -NoProfile -File $builder -OutputDirectory $direct -ExpectedVersion '0.4.2' 2>&1
-    if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath (Join-Path $direct 'agent-harness-windows-v0.4.2.zip'))) {
+    $directOutput = & powershell.exe -NoProfile -File $builder -OutputDirectory $direct -ExpectedVersion '0.4.3' 2>&1
+    if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath (Join-Path $direct 'agent-harness-windows-v0.4.3.zip'))) {
         throw "Direct builder invocation failed: $($directOutput -join ' ')"
     }
-    $zip1 = Join-Path $one 'agent-harness-windows-v0.4.2.zip'
+    $zip1 = Join-Path $one 'agent-harness-windows-v0.4.3.zip'
     if (-not (Test-Path -LiteralPath $zip1 -PathType Leaf)) { throw 'Versioned ZIP is missing' }
     $manifest1 = Get-Content -LiteralPath (Join-Path $one 'manifest.json') -Raw -Encoding UTF8
     $manifest2 = Get-Content -LiteralPath (Join-Path $two 'manifest.json') -Raw -Encoding UTF8
     if ($manifest1 -cne $manifest2) { throw 'Manifest is not reproducible' }
     $manifest = $manifest1 | ConvertFrom-Json
-    if ($manifest.version -cne '0.4.2' -or $manifest.files.Count -ne 25) { throw 'Manifest version or file count is wrong' }
-    if (-not (Test-Path -LiteralPath (Join-Path $one 'agent-harness-windows-v0.4.2.sha256'))) { throw 'ZIP checksum is missing' }
+    if ($manifest.version -cne '0.4.3' -or $manifest.files.Count -ne 26) { throw 'Manifest version or file count is wrong' }
+    if (-not (Test-Path -LiteralPath (Join-Path $one 'agent-harness-windows-v0.4.3.sha256'))) { throw 'ZIP checksum is missing' }
 
     $extract = Join-Path $scratch 'unpacked archive'
     Expand-Archive -LiteralPath $zip1 -DestinationPath $extract
+    $license = Join-Path $extract 'LICENSE'
+    if (-not (Test-Path -LiteralPath $license -PathType Leaf)) { throw 'ZIP is missing the MIT license' }
+    if ((Get-FileHash -LiteralPath $license -Algorithm SHA256).Hash -cne
+        (Get-FileHash -LiteralPath (Join-Path $Root 'LICENSE') -Algorithm SHA256).Hash) { throw 'ZIP license differs from repository license' }
+    $licenseEntry = @($manifest.files | Where-Object { $_.path -ceq 'LICENSE' })
+    if ($licenseEntry.Count -ne 1 -or $licenseEntry[0].sha256 -cne (Get-FileHash -LiteralPath $license -Algorithm SHA256).Hash.ToLowerInvariant()) {
+        throw 'Manifest does not protect the license'
+    }
     $packageFiles = @(Get-ChildItem -LiteralPath $extract -File -Recurse)
-    if ($packageFiles.Count -ne 26) { throw 'ZIP contains unexpected file count' }
+    if ($packageFiles.Count -ne 27) { throw 'ZIP contains unexpected file count' }
     if (-not (Test-Path -LiteralPath (Join-Path $extract 'readme.md')) -or
         (Test-Path -LiteralPath (Join-Path $extract 'payload\README.md'))) {
         throw 'Package documentation is in the wrong location'
@@ -52,6 +60,10 @@ try {
     }
     & powershell.exe -NoProfile -File (Join-Path $extract 'install.ps1') -VerifyOnly -PackageRoot $extract | Out-Null
     if ($LASTEXITCODE -ne 0) { throw 'Extracted package did not verify' }
+    Add-Content -LiteralPath $license -Value 'tampered'
+    & powershell.exe -NoProfile -File (Join-Path $extract 'install.ps1') -VerifyOnly -PackageRoot $extract | Out-Null
+    if ($LASTEXITCODE -eq 0) { throw 'Tampered license was accepted' }
+    Copy-Item -LiteralPath (Join-Path $Root 'LICENSE') -Destination $license -Force
     $launch = 'call "' + (Join-Path $extract 'install.cmd') + '" -VerifyOnly <NUL'
     $launchOutput = & cmd.exe /d /c $launch 2>&1
     if ($LASTEXITCODE -ne 0 -or ($launchOutput -join ' ') -notmatch 'Package verification: PASS') {

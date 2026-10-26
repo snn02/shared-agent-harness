@@ -27,7 +27,7 @@ try {
     $out = Join-Path $scratch 'build'
     & (Join-Path $Root 'tools\build-windows-release.ps1') -OutputDirectory $out | Out-Null
     $package = Join-Path $scratch 'package'
-    Expand-Archive -LiteralPath (Join-Path $out 'agent-harness-windows-v0.4.2.zip') -DestinationPath $package
+    Expand-Archive -LiteralPath (Join-Path $out 'agent-harness-windows-v0.4.3.zip') -DestinationPath $package
     $bin = Join-Path $scratch 'bin'
     New-Item -ItemType Directory -Path $bin | Out-Null
     foreach ($app in @('codex', 'claude', 'opencode')) {

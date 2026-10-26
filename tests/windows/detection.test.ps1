@@ -19,7 +19,7 @@ try {
     $out = Join-Path $scratch 'package output'
     & (Join-Path $Root 'tools\build-windows-release.ps1') -OutputDirectory $out | Out-Null
     $extract = Join-Path $scratch 'extracted'
-    Expand-Archive -LiteralPath (Join-Path $out 'agent-harness-windows-v0.4.2.zip') -DestinationPath $extract
+    Expand-Archive -LiteralPath (Join-Path $out 'agent-harness-windows-v0.4.3.zip') -DestinationPath $extract
     $installer = Join-Path $extract 'install.ps1'
     $profile = Join-Path $scratch 'fictional profile'
     New-Item -ItemType Directory -Path $profile | Out-Null
